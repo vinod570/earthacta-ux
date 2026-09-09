@@ -1,0 +1,10 @@
+Item,Owner,Status,Waiting On,Notes
+Share technical/taxonomy reference doc,Shyam,Waiting on Shyam,Shyam,Requested in Slack - not yet received
+Share candidate jurisdiction / data source list,Shyam,Waiting on Shyam,Shyam,Requested in Slack - not yet received
+Answer: where does provenance/source-citation live in UI,Shyam,Waiting on Shyam,Shyam,Sent recommendation (inline by default) - awaiting confirmation
+Mock 1-2 stats on Godavari panel with source+date+badge,Madhu,In progress,Vinod (sample data),Madhu building; needs sample data from Vinod first
+Build sample river dataset (length/discharge/coverage + source/date/status),Vinod,Not started,-,Needed to hand to Madhu for the mock
+Reuse data-viz tokens as verification-state badges,Vinod + Madhu,Proposed,Shyam confirmation (indirect),positive=verified warning=pending negative=flagged neutral=missing
+Flag: distinct type treatment for data values vs narrative text,Vinod,Suggested - not urgent,-,Raised to Madhu as a nice-to-have
+Clarify: is map view public explainer layer or does it carry full provenance,Shyam,Waiting on Shyam,Shyam,Core open question - affects scope of Madhu's work
+Interview new candidate profile,Vinod,Not started,-,Need to define what to screen for (UX vs frontend vs backend)

@@ -1,0 +1,26 @@
+Phase,Task,Estimated Duration,Depends On,Output/Deliverable
+0. Foundation,Get partner confirmation on provenance placement (inline vs layered),1-2 days (waiting time, not effort),Sent - awaiting reply,Confirmed UI placement decision
+0. Foundation,Receive + review technical/taxonomy reference doc,1 day to review once received,Partner sharing doc,Shared vocabulary for resource/entity modeling
+0. Foundation,Confirm final jurisdiction (Odisha vs alternates) and available data sources,1-2 days,Partner sharing source list,Locked jurisdiction + known source list
+0. Foundation,Reconcile existing wireframe direction (map+drilldown) with evidence-funnel concept from design system doc,1 day,Provenance placement decision,Single agreed UX direction (not two parallel concepts)
+1. Design System,Extend existing tokens with data-vs-narrative type treatment,0.5-1 day,Phase 0 complete,Updated token doc/Figma library
+1. Design System,Define evidence-state badge spec (verified/pending/flagged/missing) using existing data-viz colors,0.5 day,Token extension,Badge component spec
+1. Design System,Define source+date citation micro-component (inline label pattern),0.5 day,Badge spec,Citation component spec
+2. Component Library,Build evidence-state badge component (Figma + spec for dev handoff),1 day,Design system phase,Reusable badge component
+2. Component Library,Build source+date citation component,1 day,Design system phase,Reusable citation component
+2. Component Library,Build discrepancy banner component,1-1.5 days,Component patterns agreed,Reusable discrepancy component
+2. Component Library,Build verification-gate sequence component (if applicable to this pilot's data),1-1.5 days,Component patterns agreed,Reusable gate component
+2. Component Library,Adapt evidence-funnel component to dark wireframe theme (if used in this view),1-2 days,Component patterns agreed,Reusable funnel component
+3. Sample Data,Build realistic sample dataset for Water/Godavari (stats + source + date + status per field),1 day,Jurisdiction/source list confirmed,Sample dataset file
+3. Sample Data,Extend sample data pattern to 1 additional category (e.g. Land or Energy) as proof of reusability,1 day,Water sample data done,Second category sample dataset
+4. Screen Design,Apply badge+citation components to Godavari detail panel (1-2 stats first pass),1 day,Component library + sample data,First working mock (already scoped separately)
+4. Screen Design,Extend treatment to all stats in Godavari panel,1 day,First pass reviewed/approved,Fully annotated Godavari panel
+4. Screen Design,Design missing-data and flagged-discrepancy states for at least one real example,1-1.5 days,Sample data includes edge cases,Edge-case screens
+4. Screen Design,Design category-switch behavior (Water to Land etc.) with consistent provenance treatment,1-2 days,Godavari panel finalized,Category-switch spec/screens
+5. Prototype,Build clickable prototype (Figma or coded) demonstrating map to drilldown to citation-hover flow,2-3 days,Screen designs finalized,Interactive prototype
+6. Validation,Informal review with partner/domain reviewer for trust/clarity of provenance treatment,0.5-1 day (scheduling dependent),Prototype ready,Feedback notes + revision list
+6. Validation,Revise based on feedback,1-2 days,Feedback received,Updated screens/prototype
+7. Handoff,Document component specs + states for engineering handoff (spacing, states, tokens referenced),1-2 days,Validated design,Dev-ready spec document
+7. Handoff,Walkthrough session with Madhu/Ankit/engineering on implementation approach,0.5 day,Spec document ready,Shared understanding across team
+8. QA / Principles Check,Audit final screens against core principles (no summed headline numbers, discrepancies surfaced not resolved, sourced-not-decorative aesthetic),0.5-1 day,Screens finalized,Signed-off compliant UX
+9. Buffer,Reserved for rework, partner delay, or newly discovered edge cases,3-5 days (contingency, not sequential),Ongoing,-

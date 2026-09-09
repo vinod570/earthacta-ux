@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EarthActa — Godavari (provenance prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* --- tokens copied from Madhu's token sheet --- */
+    --bg-dark:#164936;
+    --neutral-900:#202321;
+    --neutral-800:#303330;
+    --neutral-700:#555856;
+    --neutral-500:#898B88;
+    --neutral-300:#D5D6D2;
+    --neutral-200:#E4E4E0;
+    --white:#FFFFFF;
+
+    --brand-primary:#20523D;
+    --brand-tertiary:#6E8B78;
+    --brand-light:#39755A;
+
+    --dv-positive:#39755A;
+    --dv-warning:#A57B3B;
+    --dv-negative:#985147;
+    --dv-neutral:#898B88;
+
+    --radius-sm:4px;
+    --radius-md:8px;
+    --radius-lg:12px;
+    --radius-pill:999px;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--neutral-900);
+    color:var(--white);
+    font-family:'Inter',sans-serif;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  .app{
+    display:flex;
+    height:100vh;
+    min-height:640px;
+  }
+
+  /* --- left icon rail (from wireframe) --- */
+  .rail{
+    width:96px;
+    background:var(--neutral-900);
+    border-right:1px solid rgba(255,255,255,0.06);
+    display:flex;
+    flex-direction:column;
+  }
+  .rail-item{
+    padding:18px 0;
+    text-align:center;
+    font-size:11px;
+    letter-spacing:0.02em;
+    color:var(--neutral-500);
+    cursor:pointer;
+    border-bottom:1px solid rgba(255,255,255,0.04);
+  }
+  .rail-item.active{
+    background:var(--brand-primary);
+    color:var(--white);
+  }
+  .rail-icon{ font-size:18px; display:block; margin-bottom:6px; }
+
+  /* --- main map area (placeholder for Madhu's satellite tile) --- */
+  .map{
+    flex:1;
+    position:relative;
+    background:
+      radial-gradient(circle at 30% 40%, rgba(110,139,120,0.15), transparent 60%),
+      linear-gradient(135deg, #1b2b20, #10160f);
+    overflow:hidden;
+  }
+  .map::after{
+    content:"map tile — placeholder for Madhu's satellite imagery";
+    position:absolute; bottom:16px; left:16px;
+    font-size:11px; color:rgba(255,255,255,0.25);
+  }
+  .brand{
+    position:absolute; top:20px; left:20px;
+    display:flex; align-items:center; gap:10px;
+    background:rgba(20,26,22,0.7);
+    padding:10px 16px;
+    border-radius:var(--radius-lg);
+    font-weight:700;
+    font-size:15px;
+  }
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--brand-tertiary);}
+
+  /* --- detail panel --- */
+  .panel{
+    width:400px;
+    background:#12211a;
+    border-left:1px solid rgba(255,255,255,0.06);
+    padding:24px;
+    overflow-y:auto;
+  }
+  .panel h2{
+    margin:0 0 4px;
+    font-size:26px;
+    font-weight:700;
+  }
+  .panel .subtitle{
+    color:var(--neutral-500);
+    font-size:13px;
+    margin-bottom:20px;
+  }
+
+  .stat-block{
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    padding:16px 0;
+  }
+  .stat-block:first-of-type{ padding-top:0; }
+
+  .stat-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .stat-value{
+    font-size:28px;
+    font-weight:700;
+  }
+  .stat-unit{
+    font-size:14px;
+    color:var(--neutral-500);
+    font-weight:500;
+  }
+  .stat-label{
+    font-size:12px;
+    color:var(--neutral-500);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    margin-bottom:4px;
+  }
+
+  .provenance{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:8px;
+    font-size:11.5px;
+    color:var(--neutral-300);
+    position:relative;
+  }
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:2px 9px;
+    border-radius:var(--radius-pill);
+    font-size:10.5px;
+    font-weight:600;
+    letter-spacing:0.01em;
+    cursor:default;
+  }
+  .badge .swatch{width:6px;height:6px;border-radius:50%;}
+  .badge.verified{ background:rgba(57,117,90,0.15); color:var(--dv-positive); }
+  .badge.verified .swatch{ background:var(--dv-positive); }
+  .badge.pending{ background:rgba(165,123,59,0.15); color:var(--dv-warning); }
+  .badge.pending .swatch{ background:var(--dv-warning); }
+  .badge.flagged{ background:rgba(152,81,71,0.15); color:var(--dv-negative); }
+  .badge.flagged .swatch{ background:var(--dv-negative); }
+  .badge.missing{ background:rgba(137,139,136,0.15); color:var(--dv-neutral); }
+  .badge.missing .swatch{ background:var(--dv-neutral); }
+
+  .cite{
+    color:var(--neutral-500);
+  }
+
+  .tooltip{
+    display:none;
+    position:absolute;
+    bottom:calc(100% + 6px);
+    left:0;
+    background:var(--neutral-900);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:var(--radius-sm);
+    padding:8px 10px;
+    font-size:11px;
+    color:var(--neutral-200);
+    white-space:nowrap;
+    box-shadow:0 4px 20px rgba(0,0,0,0.3);
+    z-index:5;
+  }
+  .badge:hover + .tooltip,
+  .provenance:hover .tooltip{
+    display:block;
+  }
+
+  .discrepancy-note{
+    margin-top:10px;
+    padding:10px 12px;
+    background:rgba(152,81,71,0.08);
+    border-left:3px solid var(--dv-negative);
+    border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+    font-size:12px;
+    color:var(--neutral-200);
+    line-height:1.5;
+  }
+  .discrepancy-note b{ color:var(--dv-negative); }
+
+  .section-title{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--neutral-500);
+    margin:24px 0 10px;
+  }
+
+  /* --- bottom expandable panel, matching the closer wireframe view --- */
+  .app{ flex-direction:column; }
+  .app > .map-row{ display:flex; flex:1; min-height:0; }
+
+  .bottom-panel{
+    background:#12211a;
+    border-top:1px solid rgba(255,255,255,0.08);
+    padding:20px 28px 26px;
+  }
+  .bottom-header{
+    font-size:26px;
+    font-weight:700;
+    color:var(--brand-tertiary);
+    letter-spacing:0.02em;
+    margin-bottom:16px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .bottom-header .chev{ color:var(--neutral-500); font-size:16px; }
+
+  .bottom-grid{
+    display:grid;
+    grid-template-columns:1.1fr 1.1fr 0.9fr;
+    gap:32px;
+  }
+  .col-title{
+    font-size:18px;
+    font-weight:700;
+    margin-bottom:12px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .plus{
+    color:var(--dv-positive);
+    border:1px solid var(--dv-positive);
+    border-radius:50%;
+    width:18px; height:18px;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:12px;
+  }
+  .fact-list{
+    list-style:none;
+    margin:0; padding:0;
+  }
+  .fact-list li{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    font-size:13.5px;
+    color:var(--neutral-200);
+    padding:7px 0;
+    border-bottom:1px solid rgba(255,255,255,0.04);
+  }
+  .badge.sm{
+    font-size:9.5px;
+    padding:1px 7px;
+    flex-shrink:0;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+ <div class="map-row">
+  <div class="rail">
+    <div class="rail-item">
+      <span class="rail-icon">💧</span>WATER
+    </div>
+    <div class="rail-item active">
+      <span class="rail-icon">▦</span>LAND
+    </div>
+    <div class="rail-item">
+      <span class="rail-icon">◆</span>MINERALS
+    </div>
+    <div class="rail-item">
+      <span class="rail-icon">🌲</span>FOREST
+    </div>
+    <div class="rail-item">
+      <span class="rail-icon">⚡</span>ENERGY
+    </div>
+  </div>
+
+  <div class="map">
+    <div class="brand"><span class="dot"></span> Earthacta</div>
+  </div>
+
+  <div class="panel">
+    <h2>Godavari</h2>
+    <div class="subtitle">The longest river in peninsular India, starting in Maharashtra and flowing into the Bay of Bengal.</div>
+
+    <div class="stat-block">
+      <div class="stat-label">Length</div>
+      <div class="stat-row">
+        <span class="stat-value">1,465 <span class="stat-unit">km</span></span>
+      </div>
+      <div class="provenance">
+        <span class="badge verified"><span class="swatch"></span>verified</span>
+        <span class="cite mono">CWC · Aug 2026</span>
+        <div class="tooltip">Central Water Commission — River Basin Atlas, published Aug 2026</div>
+      </div>
+    </div>
+
+    <div class="stat-block">
+      <div class="stat-label">Coverage area</div>
+      <div class="stat-row">
+        <span class="stat-value">312,812 <span class="stat-unit">km²</span></span>
+      </div>
+      <div class="provenance">
+        <span class="badge verified"><span class="swatch"></span>verified</span>
+        <span class="cite mono">CWC · Aug 2026</span>
+        <div class="tooltip">Central Water Commission — River Basin Atlas, published Aug 2026</div>
+      </div>
+    </div>
+
+    <div class="stat-block">
+      <div class="stat-label">Discharge (latest reading)</div>
+      <div class="stat-row">
+        <span class="stat-value">≈980 <span class="stat-unit">m³/s</span></span>
+      </div>
+      <div class="provenance">
+        <span class="badge pending"><span class="swatch"></span>pending</span>
+        <span class="cite mono">CWC gauge station · 2022</span>
+        <div class="tooltip">No reading published after 2022; treated as pending, not current</div>
+      </div>
+      <div class="discrepancy-note">
+        <b>Gap flagged —</b> no discharge data published for 2000–2020. Trend line should not be read as continuous.
+      </div>
+    </div>
+
+    <div class="stat-block">
+      <div class="stat-label">Left-bank tributary contribution</div>
+      <div class="stat-row">
+        <span class="stat-value">59.7 <span class="stat-unit">%</span></span>
+      </div>
+      <div class="provenance">
+        <span class="badge missing"><span class="swatch"></span>missing source</span>
+        <span class="cite mono">uncited</span>
+        <div class="tooltip">Figure present in existing draft copy, but no source document identified yet</div>
+      </div>
+    </div>
+
+    <div class="section-title">Every number above traces to a source</div>
+  </div>
+ </div>
+
+<div class="bottom-panel">
+  <div class="bottom-header">GODAVARI <span class="chev">⌄</span></div>
+  <div class="bottom-grid">
+
+    <div class="bottom-col">
+      <div class="col-title">Key Facts <span class="plus">+</span></div>
+      <ul class="fact-list">
+        <li>
+          <span>1,465 kilometers (910 miles)</span>
+          <span class="badge verified sm"><span class="swatch"></span>verified</span>
+        </li>
+        <li>
+          <span>Source: Trimbakeshwar near Nashik, Maharashtra</span>
+          <span class="badge verified sm"><span class="swatch"></span>verified</span>
+        </li>
+        <li>
+          <span>Endpoint: Bay of Bengal</span>
+          <span class="badge verified sm"><span class="swatch"></span>verified</span>
+        </li>
+        <li>
+          <span>Nickname: Dakshin Ganga</span>
+          <span class="badge missing sm"><span class="swatch"></span>uncited</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="bottom-col">
+      <div class="col-title">Major Tributaries <span class="plus">+</span></div>
+      <ul class="fact-list">
+        <li>
+          <span>Left Bank: Pranhita, Indravati, Sabari, Purna</span>
+          <span class="badge pending sm"><span class="swatch"></span>partial</span>
+        </li>
+        <li>
+          <span>Right Bank: Manjira, Pravara, Maner</span>
+          <span class="badge pending sm"><span class="swatch"></span>partial</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="bottom-col">
+      <div class="col-title">Discharge <span class="plus">+</span></div>
+      <div class="badge pending sm" style="margin-bottom:8px;"><span class="swatch"></span>gap: 2000–2020 unpublished</div>
+      <svg width="100%" height="70" viewBox="0 0 220 70" style="opacity:0.9">
+        <polyline points="0,65 30,40 60,42 90,44 120,20 150,12 180,10 210,18"
+          fill="none" stroke="#39755A" stroke-width="2"/>
+      </svg>
+    </div>
+
+  </div>
+</div>
+</div>
+
+</body>
+</html>

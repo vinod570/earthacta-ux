@@ -1,0 +1,165 @@
+{
+  "_meta": {
+    "purpose": "SYNTHETIC sample data for UX design/wireframing only — not real EarthActa data",
+    "jurisdiction": "Odisha, India",
+    "resources_covered": ["hydro_power", "groundwater"],
+    "evidence_cutoff": "2026-08-15",
+    "schema_note": "Modeled on the evidence-funnel / verification-gate pattern seen in the reference infographic. Each record traces a value through its evidence stage, links back to a cited source, and explicitly flags discrepancies or missing data rather than silently reconciling them."
+  },
+
+  "resource_base": [
+    {
+      "id": "hydro-001",
+      "resource_type": "hydro_power",
+      "asset_name": "Operating Large Hydro (aggregate)",
+      "value": 2099.80,
+      "unit": "MW",
+      "status": "operating",
+      "evidence_stage": "commissioned",
+      "verified": true,
+      "sources": [
+        {"name": "CEA National Power Portal", "as_of": "2026-08-01", "url": "https://example-cea.gov.in/reports"}
+      ],
+      "notes": "FY2024-25 energy sold: 5,853.21 MU; annual-equivalent load factor 31.82%"
+    },
+    {
+      "id": "hydro-002",
+      "resource_type": "hydro_power",
+      "asset_name": "Small Hydro (listed)",
+      "value": 134.15,
+      "unit": "MW",
+      "status": "listed",
+      "evidence_stage": "commissioned",
+      "verified": false,
+      "sources": [
+        {"name": "GRIDCO Portal", "as_of": "2026-07-20", "url": "https://example-gridco.in/portal"}
+      ],
+      "notes": "Output-verified subset only 109.15 MW (FY2024-25 energy: 451.01 MU); remainder unverified"
+    },
+    {
+      "id": "hydro-003",
+      "resource_type": "hydro_power",
+      "asset_name": "Pumped Storage — Operating",
+      "value": 0,
+      "unit": "MW",
+      "status": "operating",
+      "evidence_stage": "commissioned",
+      "verified": true,
+      "sources": [{"name": "CEA PSP Register", "as_of": "2026-08-01", "url": "https://example-cea.gov.in/psp"}]
+    },
+    {
+      "id": "hydro-004",
+      "resource_type": "hydro_power",
+      "asset_name": "Pumped Storage — CEA Concurred",
+      "value": 600,
+      "unit": "MW",
+      "status": "approved_not_built",
+      "evidence_stage": "cea_concurrence",
+      "verified": true,
+      "sources": [{"name": "CEA PSP Register", "as_of": "2026-08-01", "url": "https://example-cea.gov.in/psp"}],
+      "notes": "Developer target commissioning window: 2032-33"
+    },
+    {
+      "id": "hydro-005",
+      "resource_type": "hydro_power",
+      "asset_name": "Pumped Storage — Technical Potential",
+      "value": 41525,
+      "unit": "MW",
+      "status": "potential_not_available",
+      "evidence_stage": "technical_potential",
+      "verified": false,
+      "sources": [{"name": "Internal terrain/site-suitability estimate", "as_of": "2026-07-15", "url": null}],
+      "notes": "Not a firm/available number — technical potential only, based on site suitability analysis"
+    },
+    {
+      "id": "gw-001",
+      "resource_type": "groundwater",
+      "asset_name": "Assessed Extractable Groundwater — Coastal Belt Block",
+      "value": 48.6,
+      "unit": "MCM/year",
+      "status": "assessed",
+      "evidence_stage": "official_assessment",
+      "verified": true,
+      "sources": [{"name": "Central Ground Water Board (CGWB) District Report", "as_of": "2026-03-31", "url": "https://example-cgwb.gov.in/district-report"}]
+    },
+    {
+      "id": "gw-002",
+      "resource_type": "groundwater",
+      "asset_name": "Actual Extraction (metered)",
+      "value": 31.2,
+      "unit": "MCM/year",
+      "status": "metered",
+      "evidence_stage": "operational_record",
+      "verified": false,
+      "sources": [{"name": "State Groundwater Dept — meter readings", "as_of": "2026-06-30", "url": "https://example-swb.odisha.gov.in/meters"}],
+      "notes": "Only 62% of registered wells in this block report metered data; remainder estimated"
+    }
+  ],
+
+  "evidence_funnel": {
+    "resource_type": "hydro_power",
+    "stages": [
+      {"stage": "technical_potential", "value": 41525, "unit": "MW"},
+      {"stage": "pfr_dfr_dpr", "value": 3200, "unit": "MW"},
+      {"stage": "cea_concurrence", "value": 600, "unit": "MW"},
+      {"stage": "physical_construction", "value": 0, "unit": "MW"},
+      {"stage": "commissioned", "value": 2233.95, "unit": "MW"},
+      {"stage": "commercially_allocated", "value": 1980.40, "unit": "MW"},
+      {"stage": "dispatchable_at_target", "value": 1450.00, "unit": "MW"}
+    ],
+    "firm_stage": "dispatchable_at_target",
+    "note": "Only the firm_stage value should be summed into headline 'available power' claims"
+  },
+
+  "discrepancies": [
+    {
+      "id": "disc-001",
+      "description": "GRIDCO portal row-level sum does not match displayed aggregate for small hydro",
+      "resource_ref": "hydro-002",
+      "displayed_value": 49875,
+      "row_sum_value": 49753,
+      "unit": "MW",
+      "delta": 122,
+      "severity": "flag",
+      "source": {"name": "GRIDCO Portal Audit", "as_of": "2026-08-01"}
+    },
+    {
+      "id": "disc-002",
+      "description": "Groundwater extraction reporting incomplete — over a third of wells in block unmetered",
+      "resource_ref": "gw-002",
+      "displayed_value": null,
+      "row_sum_value": null,
+      "unit": "MCM/year",
+      "delta": null,
+      "severity": "missing_data",
+      "source": {"name": "State Groundwater Dept", "as_of": "2026-06-30"}
+    }
+  ],
+
+  "verification_gates": {
+    "resource_type": "hydro_power",
+    "asset_ref": "hydro-004",
+    "gates": [
+      {"gate": "offtake_right", "status": "pass"},
+      {"gate": "open_access_grid_network_access_rights", "status": "pass"},
+      {"gate": "atc_n1_study", "status": "pending"},
+      {"gate": "fifteen_minute_time_block_profile", "status": "fail"},
+      {"gate": "firming_replacement_plan", "status": "pass"},
+      {"gate": "losses_shortfall_liquidated_damages", "status": "pass"}
+    ],
+    "all_gates_required_for": "classification_as_firm_power"
+  },
+
+  "delivery_chain": {
+    "resource_type": "hydro_power",
+    "target": "Sample Industrial Campus",
+    "nodes": [
+      {"node": "source_hydro_plant", "asset_ref": "hydro-004"},
+      {"node": "grid_injection_point", "voltage_kv": 400},
+      {"node": "intermediate_substation_1"},
+      {"node": "intermediate_substation_2"},
+      {"node": "local_distribution_network"},
+      {"node": "campus_delivery_point", "resilience_layers": ["dual_utility_feeds", "ups_bess", "emergency_generation"]}
+    ]
+  }
+}
