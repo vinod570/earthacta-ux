@@ -10,22 +10,83 @@
 <link href="CSS/style.css" type="text/css" rel="stylesheet">
 <link href="CSS/toggle.css" type="text/css" rel="stylesheet">
 <style>
-  .region-picker{
-    position:absolute; top:20px; right:20px; z-index:5;
+  .map-pins{
+    position:absolute; inset:0; z-index:3;
+    pointer-events:none;
   }
-  .region-select{
-    background:rgba(9,35,40,0.9);
-    color:var(--mint);
+  .pin{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    display:flex; flex-direction:column; align-items:center;
+    cursor:pointer;
+    pointer-events:auto;
+  }
+
+  /* Size encodes HIERARCHY level. Color encodes DATA STATUS
+     (worst provenance state across the node's categories) —
+     same verified/pending/flagged/missing palette as the badges,
+     so map color and panel badges mean the same thing everywhere. */
+  .pin[data-level="country"] .pin-dot{ width:16px; height:16px; }
+  .pin[data-level="region"] .pin-dot{ width:11px; height:11px; }
+  .pin[data-level="district"] .pin-dot{ width:7px; height:7px; }
+
+  .pin-dot{
+    border-radius:50%;
+    border:2px solid var(--mint);
+  }
+  .pin-dot.status-verified{ background:var(--verified); }
+  .pin-dot.status-pending{ background:var(--pending); }
+  .pin-dot.status-flagged{ background:var(--flagged); }
+  .pin-dot.status-missing{ background:var(--missing); }
+
+  /* Selected node gets the "hotspot" ring treatment — reserved for
+     the CURRENT selection, not applied to every country by default */
+  .pin.active .pin-ring{
+    position:absolute; left:50%; top:50%;
+    width:26px; height:26px;
+    border-radius:50%;
+    border:1.5px solid var(--mint);
+    transform:translate(-50%,-50%);
+  }
+  .pin.active .pin-ring::after{
+    content:"";
+    position:absolute; left:50%; top:50%;
+    width:5px; height:5px; border-radius:50%;
+    background:var(--mint);
+    transform:translate(-50%,-50%);
+  }
+
+  .pin[data-level="country"] .pin-label{
+    font-size:12px; font-weight:700; letter-spacing:0.03em; text-transform:uppercase;
+    margin-top:6px; color:var(--mint); text-shadow:0 1px 3px rgba(0,0,0,0.7);
+  }
+  .pin[data-level="region"] .pin-label{
+    font-size:11px; font-weight:600; margin-top:5px;
+    color:var(--text-dim); text-shadow:0 1px 3px rgba(0,0,0,0.7);
+  }
+  .pin[data-level="district"] .pin-label{
+    font-size:10px; font-weight:400; margin-top:4px;
+    color:var(--text-faint); text-shadow:0 1px 3px rgba(0,0,0,0.7);
+  }
+  .pin.active .pin-label{ color:var(--mint) !important; }
+
+  .map-legend{
+    position:absolute; bottom:16px; right:20px; z-index:5;
+    background:rgba(9,35,40,0.88);
     border:1px solid var(--border);
     border-radius:var(--r-md);
-    padding:10px 14px;
-    font-family:"Inter",sans-serif;
-    font-size:13px;
-    font-weight:600;
-    min-width:200px;
-    cursor:pointer;
+    padding:8px 12px;
+    display:flex; gap:12px;
+    font-size:10.5px;
+    color:var(--text-dim);
   }
-  .region-select option{ background:var(--dark); color:var(--mint); font-weight:400; }
+  .map-legend .lg-item{ display:flex; align-items:center; gap:5px; }
+  .map-legend .lg-dot{ width:8px; height:8px; border-radius:50%; }
+
+  .bg-placeholder-note{
+    position:absolute; bottom:16px; left:20px; z-index:4;
+    font-size:11px; color:rgba(229,237,230,0.35);
+  }
   .no-coverage{
     padding:24px 10px; text-align:center; color:var(--text-faint); font-size:13px;
   }
@@ -51,20 +112,16 @@
       <div class="logo-text"><img src="assets/EarthActa_logo.svg"></div>
     </div>
 
-    <div class="region-picker">
-      <select class="region-select" id="regionSelect">
-        <optgroup label="India">
-          <option value="IN">India (country)</option>
-          <option value="IN-OD">&nbsp;&nbsp;&nbsp;Odisha</option>
-          <option value="IN-OD-CTC">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cuttack district</option>
-        </optgroup>
-        <optgroup label="United States">
-          <option value="US">United States (country)</option>
-          <option value="US-CA">&nbsp;&nbsp;&nbsp;California</option>
-          <option value="US-CA-SAC">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sacramento County</option>
-        </optgroup>
-      </select>
+    <div class="map-pins" id="mapPins"></div>
+
+    <div class="map-legend">
+      <div class="lg-item"><span class="lg-dot" style="background:var(--verified);"></span>verified</div>
+      <div class="lg-item"><span class="lg-dot" style="background:var(--pending);"></span>pending</div>
+      <div class="lg-item"><span class="lg-dot" style="background:var(--flagged);"></span>flagged</div>
+      <div class="lg-item"><span class="lg-dot" style="background:var(--missing);"></span>no data</div>
     </div>
+
+    <div class="bg-placeholder-note" id="bgNote"></div>
 
     <div class="rail" id="categoryRail">
       <div class="rail-item active" data-category="water">
@@ -72,6 +129,9 @@
       </div>
       <div class="rail-item" data-category="land">
         <img src="assets/icons/mdi_land-fields.svg"> LAND
+      </div>
+      <div class="rail-item" data-category="forest">
+        <img src="assets/icons/forest-outline.svg"> FOREST
       </div>
       <div class="rail-item" data-category="minerals">
         <img src="assets/icons/lineicons_diamonds-1.svg"> MINERALS
@@ -193,19 +253,77 @@ function renderPanel(){
   else renderNone();
 }
 
-document.getElementById('regionSelect').addEventListener('change', (e) => {
-  currentNode = e.target.value;
+document.getElementById('mapPins').addEventListener('click', (e) => {
+  const pin = e.target.closest('.pin');
+  if(!pin) return;
+  currentNode = pin.dataset.node;
+  buildPins();
   renderPanel();
 });
+
+const CATEGORY_BG = {
+  water: 'stage_water_bg',
+  land: 'stage_land_bg',
+  forest: 'stage_forest_bg',
+  minerals: 'stage_minerals_bg',
+  energy: 'stage_energy_bg'
+};
+const CATEGORY_BG_READY = { water:true, land:true, forest:false, minerals:false, energy:false };
+
+function updateStageBackground(){
+  const stage = document.getElementById('stage');
+  Object.values(CATEGORY_BG).forEach(cls => stage.classList.remove(cls));
+  stage.classList.add(CATEGORY_BG[currentCategory]);
+  document.getElementById('bgNote').textContent = CATEGORY_BG_READY[currentCategory]
+    ? ''
+    : 'placeholder background — needs real map art for this category';
+}
 
 document.getElementById('categoryRail').addEventListener('click', (e) => {
   const item = e.target.closest('.rail-item');
   if(!item) return;
   currentCategory = item.dataset.category;
   document.querySelectorAll('.rail-item').forEach(p => p.classList.toggle('active', p === item));
+  updateStageBackground();
   renderPanel();
 });
 
+const SEVERITY = { flagged:3, missing:2, pending:1, verified:0 };
+
+function nodeWorstStatus(node){
+  const categories = ['water','land','forest','minerals','energy'];
+  let worst = 'verified';
+  categories.forEach(c => {
+    const cat = node[c];
+    if(!cat) return;
+    let s;
+    if(cat.kind === 'matrix') s = cat.headline.status;
+    else if(cat.kind === 'none') s = 'missing';
+    else if(cat.kind === 'india_water') s = 'verified';
+    else if(cat.kind === 'india_land') s = 'flagged';
+    else s = 'verified';
+    if(SEVERITY[s] > SEVERITY[worst]) worst = s;
+  });
+  return worst;
+}
+
+function buildPins(){
+  const container = document.getElementById('mapPins');
+  container.innerHTML = Object.keys(NODES).map(id => {
+    const n = NODES[id];
+    const activeClass = id === currentNode ? ' active' : '';
+    const status = nodeWorstStatus(n);
+    const ring = id === currentNode ? '<div class="pin-ring"></div>' : '';
+    return `<div class="pin${activeClass}" data-node="${id}" data-level="${n.level}" style="left:${n.coords.x}%; top:${n.coords.y}%;">
+      ${ring}
+      <div class="pin-dot status-${status}"></div>
+      <div class="pin-label">${n.name}</div>
+    </div>`;
+  }).join('');
+}
+
+buildPins();
+updateStageBackground();
 renderPanel();
 </script>
 

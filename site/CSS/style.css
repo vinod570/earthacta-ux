@@ -59,6 +59,11 @@
       background-image: var(--land-bg);
       background-size: cover;
   }
+  /* Minerals/Forest/Energy have no real map art yet — CSS placeholders,
+     flagged for Madhu to replace with real imagery */
+  .stage_minerals_bg{ background: linear-gradient(135deg, #2b2318, #100d08); }
+  .stage_forest_bg{ background: linear-gradient(135deg, #10241a, #060f0a); }
+  .stage_energy_bg{ background: linear-gradient(135deg, #241a10, #0f0a06); }
 
   /* fake satellite river texture */
   .river-layer{
