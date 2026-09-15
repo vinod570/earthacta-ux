@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Earthacta — Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="CSS/style.css" type="text/css" rel="stylesheet">
+<link href="CSS/toggle.css" type="text/css" rel="stylesheet">
+<style>
+  .region-picker{
+    position:absolute; top:20px; right:20px; z-index:5;
+  }
+  .region-select{
+    background:rgba(9,35,40,0.9);
+    color:var(--mint);
+    border:1px solid var(--border);
+    border-radius:var(--r-md);
+    padding:10px 14px;
+    font-family:"Inter",sans-serif;
+    font-size:13px;
+    font-weight:600;
+    min-width:200px;
+    cursor:pointer;
+  }
+  .region-select option{ background:var(--dark); color:var(--mint); font-weight:400; }
+  .no-coverage{
+    padding:24px 10px; text-align:center; color:var(--text-faint); font-size:13px;
+  }
+  .facts-mini{ list-style:none; margin:0; padding:0; }
+  .facts-mini li{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    font-size:13px; padding:6px 0; border-bottom:1px solid rgba(229,237,230,0.06);
+  }
+</style>
+</head>
+<body>
+<div class="mainBg">
+
+  <div class="stage stage_water_bg" id="stage">
+
+    <div class="river-layer"></div>
+
+    <div class="hint-pill">
+      <span>&#8596; &#8597;</span> Drag to explore · click a tile to drill in
+    </div>
+
+    <div class="logo-card">
+      <div class="logo-text"><img src="assets/EarthActa_logo.svg"></div>
+    </div>
+
+    <div class="region-picker">
+      <select class="region-select" id="regionSelect">
+        <optgroup label="India">
+          <option value="IN">India (country)</option>
+          <option value="IN-OD">&nbsp;&nbsp;&nbsp;Odisha</option>
+          <option value="IN-OD-CTC">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cuttack district</option>
+        </optgroup>
+        <optgroup label="United States">
+          <option value="US">United States (country)</option>
+          <option value="US-CA">&nbsp;&nbsp;&nbsp;California</option>
+          <option value="US-CA-SAC">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sacramento County</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="rail" id="categoryRail">
+      <div class="rail-item active" data-category="water">
+        <img src="assets/icons/water-outline.svg"> WATER
+      </div>
+      <div class="rail-item" data-category="land">
+        <img src="assets/icons/mdi_land-fields.svg"> LAND
+      </div>
+      <div class="rail-item" data-category="minerals">
+        <img src="assets/icons/lineicons_diamonds-1.svg"> MINERALS
+      </div>
+      <div class="rail-item" data-category="energy">
+        <img src="assets/icons/power.svg"> ENERGY
+      </div>
+    </div>
+
+    <div class="info-panel" id="infoPanel">
+      <div class="info-panel-head">
+        <h2 id="panelTitle">India — Water</h2>
+        <button class="toggle-btn" id="toggleBtn" type="button" aria-expanded="true" aria-label="Collapse panel">
+          <span class="icon-minus"><img src="assets/icons/minus-circle.svg"></span>
+        </button>
+      </div>
+      <div class="info-panel-body" id="infoPanelBody"></div>
+    </div>
+
+    <div class="data-panel">
+      <div class="data-title-row">
+        <div class="data-title" id="dataTitle">INDIA — WATER</div>
+      </div>
+      <div class="columns" id="dataColumns"></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="script/data.js"></script>
+<script>
+
+let currentNode = "IN";
+let currentCategory = "water";
+
+function badge(status){
+  return `<span class="prov-badge ${status}"><span class="dot"></span>${status}</span>`;
+}
+
+function renderIndiaWater(){
+  document.getElementById('infoPanelBody').innerHTML = `
+    <div class="big-stat">14</div>
+    <div class="prov-row">${badge('verified')}<span class="mono-cite">Central Water Commission · 2025</span></div>
+    <div class="info-desc">Major river basins recognized nationally, covering roughly 83% of India's total drainage area.</div>
+  `;
+  document.getElementById('dataColumns').innerHTML = `
+    <div class="col">
+      <div class="col-head"><h3>Total renewable water resources</h3></div>
+      <div class="stat-value" style="font-size:20px; font-weight:700; margin-bottom:6px;">1,999 BCM/yr</div>
+      <div class="prov-row">${badge('verified')}<span class="mono-cite">CWC National Water Resources · 2024</span></div>
+    </div>
+    <div class="col">
+      <div class="col-head"><h3>Per-capita water availability</h3></div>
+      <div class="stat-value" style="font-size:20px; font-weight:700; margin-bottom:6px;">1,486 m³/yr</div>
+      <div class="prov-row">${badge('pending')}<span class="mono-cite">projection, not a direct measurement · 2024</span></div>
+    </div>
+    <div class="col">
+      <div class="col-head"><h3>States/regions in this hierarchy</h3></div>
+      <ul class="facts-mini"><li><span>Odisha</span><span class="mono-cite">select above to drill in</span></li></ul>
+    </div>
+  `;
+}
+
+function renderIndiaLand(){
+  document.getElementById('infoPanelBody').innerHTML = `
+    <div class="big-stat">3.28 <span style="font-size:16px;">million sq km</span></div>
+    <div class="prov-row">${badge('verified')}<span class="mono-cite">World Bank · 2024</span></div>
+    <div class="info-desc">India spans 3.28 million km², about 2.4% of the world's land area.</div>
+  `;
+  document.getElementById('dataColumns').innerHTML = `
+    <div class="col">
+      <div class="col-head"><h3>Climate</h3></div>
+      <p style="font-size:12.5px; color:var(--text-dim); line-height:1.5;">Strongly influenced by the Himalayas and the Thar Desert, which drive the summer and winter monsoons. The Himalayas block cold Central Asian winds, keeping the subcontinent warmer than most locations at similar latitude.</p>
+      <div class="prov-row">${badge('missing')}<span class="mono-cite">no source cited</span></div>
+    </div>
+    <div class="col">
+      <div class="col-head"><h3>Biodiversity</h3></div>
+      <p style="font-size:12.5px; color:var(--text-dim); line-height:1.5;">India is a megadiverse country, home to 8.6% of all mammal species, 13.7% of bird species, 7.9% of reptile species, and 12.2% of fish species globally.</p>
+      <div class="prov-row">${badge('flagged')}<span class="mono-cite">footnote [190] copied without its source</span></div>
+    </div>
+    <div class="col">
+      <div class="col-head"><h3>States/regions in this hierarchy</h3></div>
+      <ul class="facts-mini"><li><span>Odisha</span><span class="mono-cite">select above to drill in</span></li></ul>
+    </div>
+  `;
+}
+
+function renderMatrix(cat){
+  document.getElementById('infoPanelBody').innerHTML = `
+    <div class="big-stat">${cat.headline.value}</div>
+    <div class="prov-row">${badge(cat.headline.status)}<span class="mono-cite">${cat.headline.cite}</span></div>
+    <div class="info-desc">${cat.headline.label}</div>
+  `;
+  document.getElementById('dataColumns').innerHTML = cat.stats.map(s => `
+    <div class="col">
+      <div class="col-head"><h3>${s.label}</h3></div>
+      <div class="stat-value" style="font-size:20px; font-weight:700; margin-bottom:6px;">${s.value}</div>
+      <div class="prov-row">${badge(s.status)}<span class="mono-cite">${s.cite}</span></div>
+    </div>
+  `).join('');
+}
+
+function renderNone(){
+  document.getElementById('infoPanelBody').innerHTML = `<div class="no-coverage">No country-level data built yet for this category. Select a region below for available data.</div>`;
+  document.getElementById('dataColumns').innerHTML = '';
+}
+
+function renderPanel(){
+  const node = NODES[currentNode];
+  const cat = node[currentCategory];
+  const catLabel = currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1);
+
+  document.getElementById('panelTitle').textContent = `${node.name} — ${catLabel}`;
+  document.getElementById('dataTitle').textContent = `${node.name.toUpperCase()} — ${catLabel.toUpperCase()}`;
+
+  if(cat.kind === 'india_water') renderIndiaWater();
+  else if(cat.kind === 'india_land') renderIndiaLand();
+  else if(cat.kind === 'matrix') renderMatrix(cat);
+  else renderNone();
+}
+
+document.getElementById('regionSelect').addEventListener('change', (e) => {
+  currentNode = e.target.value;
+  renderPanel();
+});
+
+document.getElementById('categoryRail').addEventListener('click', (e) => {
+  const item = e.target.closest('.rail-item');
+  if(!item) return;
+  currentCategory = item.dataset.category;
+  document.querySelectorAll('.rail-item').forEach(p => p.classList.toggle('active', p === item));
+  renderPanel();
+});
+
+renderPanel();
+</script>
+
+<script src="script/toggle.js"></script>
+</body>
+</html>

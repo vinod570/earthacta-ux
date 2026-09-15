@@ -1,0 +1,108 @@
+/* ==========================================================
+   toggle.css — generic transition patterns for use with
+   toggle.js. Pick whichever pattern fits the component and
+   apply it to YOUR class name — nothing here is tied to a
+   specific component.
+   ========================================================== */
+
+/* ---------- Pattern 1: collapse height to zero ----------
+   Use for: accordions, "Key Facts" style panels, any block
+   that should shrink away and push nothing around it while
+   collapsing.
+   Add class "collapsible" to the element being toggled.
+*/
+.collapsible{
+  overflow:hidden;
+  max-height:2000px;   /* any value comfortably larger than the content */
+  opacity:1;
+  transition:max-height 0.35s ease, opacity 0.25s ease;
+}
+.collapsible:not(.open){
+  max-height:0;
+  opacity:0;
+  pointer-events:none;
+}
+
+/* ---------- Pattern 2: fade + slide overlay ----------
+   Use for: detail cards / panels that appear on top of other
+   content (e.g. a "+" button revealing more info).
+   Add class "overlay-panel" to the element being toggled.
+*/
+.overlay-panel{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  transform:translateY(16px);
+  pointer-events:none;
+  transition:opacity 0.25s ease, transform 0.25s ease;
+  z-index:10;
+}
+.overlay-panel.open{
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+
+/* ---------- Pattern 3: simple show/hide ----------
+   Use for: dropdown menus, tooltips, anything with no need
+   for animation.
+   Add class "simple-toggle" to the element being toggled.
+*/
+.simple-toggle{
+  display:none;
+}
+.simple-toggle.open{
+  display:block;
+}
+
+/* ---------- Pattern 4: centered modal popup ----------
+   Use for: a true popup with a dark backdrop, centered on
+   screen (e.g. a "Key Facts" detail popup).
+   Structure required:
+     <div class="modal" id="myModal">
+       <div class="modal-content"> ...card content... </div>
+     </div>
+   Clicking the dark backdrop, pressing Escape, or clicking any
+   element with data-dismiss="#myModal" all close it.
+*/
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(6,14,12,0.65);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  box-sizing:border-box;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.25s ease;
+  z-index:1000;
+}
+.modal.open{
+  opacity:1;
+  pointer-events:auto;
+}
+.modal-content{
+  transform:translateY(16px);
+  transition:transform 0.25s ease;
+  max-width:420px;
+  width:100%;
+  max-height:85vh;
+  overflow-y:auto;
+}
+.modal.open .modal-content{
+  transform:translateY(0);
+}
+
+/* ---------- Icon flip helper ----------
+   Add class "toggle-icon" to an icon/chevron inside the
+   trigger button; it flips automatically based on the
+   trigger's own aria-expanded state.
+*/
+.toggle-icon{
+  transition:transform 0.3s ease;
+}
+[aria-expanded="true"] .toggle-icon{
+  transform:rotate(180deg);
+}
