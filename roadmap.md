@@ -8,3 +8,6 @@
 - [ ] Claims coverage for every US state and Indian state (seeded)
 - [ ] Claims dashboard route (browse/filter all claims + status counts)
 - [ ] Compare view: pick multiple districts, view categories side-by-side
+- [x] Vercel + self-hosted Supabase package with step-by-step setup guide
+- [x] Earth view must fill the frame left-to-right (not sit in a corner)
+- [x] Local claims page error: "Invalid path specified in request URL"

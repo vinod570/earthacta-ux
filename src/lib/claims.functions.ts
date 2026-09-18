@@ -17,8 +17,21 @@ export type ClaimRow = {
 };
 
 function publicClient() {
-  const url = process.env["SUPABASE_URL"]!;
-  const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+  // A trailing slash (or stray whitespace) in SUPABASE_URL produces a double
+  // slash in the REST path, which the API rejects with
+  // "Invalid path specified in request URL".
+  // Hosting dashboards often keep the surrounding quotes when values are pasted
+  // from a .env file, which makes the API reject the key as invalid.
+  const unquote = (v: string) => v.trim().replace(/^['"]|['"]$/g, "").trim();
+  const rawUrl = unquote(process.env["SUPABASE_URL"] ?? "");
+  const url = rawUrl.replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
+  const key = unquote(process.env["SUPABASE_PUBLISHABLE_KEY"] ?? "");
+
+  if (!url || !key) {
+    throw new Error(
+      "Database is not configured. Set SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY in your .env file (no trailing slash on the URL).",
+    );
+  }
   return createClient<Database>(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
     global: {

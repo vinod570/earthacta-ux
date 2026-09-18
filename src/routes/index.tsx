@@ -7,10 +7,9 @@ import { Button } from "@/components/ui/button";
 import { NODES, type Category, type Status, type GeoNode } from "@/data/explorer-data";
 import { getNode, childrenOf } from "@/data/geo-registry";
 import { generateGeoInsight } from "@/lib/geo-insight.functions";
-// Images live in public/assets/ and are served from the site root.
-const logoAsset = { url: "/assets/earthacta-logo.svg" };
-const waterAsset = { url: "/assets/earthacta-water.jpg" };
-const landAsset = { url: "/assets/earthacta-land.png" };
+import logoAsset from "@/assets/earthacta-logo.svg.asset.json";
+import waterAsset from "@/assets/earthacta-water.jpg.asset.json";
+import landAsset from "@/assets/earthacta-land.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -139,6 +138,7 @@ function Explorer() {
 
       <section className="map-stage" aria-label="Interactive geographic explorer">
         <EarthMap activeId={activeId} activeCategory={category} showWorld={showWorld} nodes={NODES} onSelect={selectGeography} />
+        <p className="map-place-tag">{node.name}</p>
       </section>
 
       <aside className="place-summary">
@@ -157,15 +157,14 @@ function Explorer() {
       </aside>
 
       <section className="information-band">
-        <div className="band-title">
-          <span className="section-label">{labels[category].eyebrow}</span>
-          <h1>{node.name}</h1>
-        </div>
         <div className="band-heading">
-          <nav className="breadcrumbs" aria-label="Location breadcrumb">
-            <Button variant="ghost" onClick={goToEarth} className="crumb-home">Earth</Button>
-            {ancestors.map(([id, name]) => <span key={id}><ChevronRight /><Button variant="ghost" onClick={() => selectGeography(id)}>{name}</Button></span>)}
-          </nav>
+          <div className="band-heading-left">
+            <span className="band-eyebrow">{labels[category].eyebrow}</span>
+            <nav className="breadcrumbs" aria-label="Location breadcrumb">
+              <Button variant="ghost" onClick={goToEarth} className="crumb-home">Earth</Button>
+              {ancestors.map(([id, name]) => <span key={id}><ChevronRight /><Button variant="ghost" onClick={() => selectGeography(id)}>{name}</Button></span>)}
+            </nav>
+          </div>
           <div className="legend" aria-label="Data status legend">
             {statusOrder.map(status => <StatusBadge status={status} key={status} />)}
           </div>
